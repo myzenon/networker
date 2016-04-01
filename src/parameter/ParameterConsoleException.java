@@ -1,6 +1,6 @@
 package parameter;
 
-public class ParameterConsoleException extends Exception {
+public abstract class ParameterConsoleException extends Exception {
     private String consoleMessage;
 
     public String getConsoleMessage() {
