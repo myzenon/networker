@@ -1,13 +1,12 @@
 package parameter;
 
 import java.util.HashMap;
-import java.util.InputMismatchException;
 
 /**
  * Created by Zenon on 3/27/2016 AD.
  */
 public class Parameter {
-    public static HashMap<String, String> mapParameter(String args[]) throws Exception {
+    public static HashMap<String, String> mapParameter(String args[]) throws ParameterMisFormatException {
         HashMap<String, String> params = new HashMap<String, String>();
         String param = "";
         params.put("gui", "off");
@@ -27,56 +26,61 @@ public class Parameter {
                 param = "";
             }
             else {
-                throw new ParameterMisFormat("The input " + (param.equals("") ? arg : "-" + param) + " is incorrect format.");
+                throw new ParameterMisFormatException("The input " + (param.equals("") ? arg : "-" + param) + " is incorrect format.");
 
             }
 
         }
-        checkParameter(params);
+
         return params;
     }
-    public static void checkParameter(HashMap<String, String> params) throws Exception {
+
+    public static void checkNullParameter(HashMap<String, String> params) throws ParameterNotFoundException {
 
         // Check Null Parameters
-        if(params.get("gui").equals("off")) {
-            if(params.get("x") == null) {
-                throw new ParameterMisFormat("Parameter -x not found.");
-            }
-            if(params.get("t") == null) {
-                throw new ParameterMisFormat("Parameter -t not found.");
-            }
-            if(params.get("s") == null) {
-                throw new ParameterMisFormat("Parameter -s not found.");
-            }
-            if(params.get("p") == null) {
-                throw new ParameterMisFormat("Parameter -p not found.");
-            }
+
+        if(params.get("x") == null) {
+            throw new ParameterNotFoundException("Please input x number.", "Parameter -x not found.");
+        }
+        if(params.get("t") == null) {
+            throw new ParameterNotFoundException("Please input Protocol Type" ,"Parameter -t not found.");
+        }
+        if(params.get("s") == null) {
+            throw new ParameterNotFoundException("Please input IP Address", "Parameter -s not found.");
+        }
+        if(params.get("p") == null) {
+            throw new ParameterNotFoundException("Please input Port Number", "Parameter -p not found.");
         }
 
+
+    }
+
+
+    public static void checkParameter(HashMap<String, String> params) throws ParameterMisMatchException {
 
         // Check Type Parameters
         try {
             if(params.get("x") != null) {
                 int x = Integer.parseInt(params.get("x"));
                 if(x < 0) {
-                    throw new ParameterMisMatch("x value must in range 0 - " + Integer.MAX_VALUE);
+                    throw new ParameterMisMatchException("The number x value must in range between 0 - " + Integer.MAX_VALUE,  "Incorrect in -x parameter");
                 }
             }
             if(params.get("t") != null) {
                 params.put("t", params.get("t").toLowerCase());
                 if(!(params.get("t").equals("tcp") || params.get("t").equals("udp"))) {
-                    throw new ParameterMisMatch("t value can input only 'tcp' or 'udp'.");
+                    throw new ParameterMisMatchException("Protocol Type can input only 'tcp' or 'udp'", "Incorrect in -t parameter");
                 }
             }
             if(params.get("p") != null) {
                 int p = Integer.parseInt(params.get("p"));
                 if((p < 1) || (p > 65535)) {
-                    throw new ParameterMisMatch("p value can input only [1 - 65535]");
+                    throw new ParameterMisMatchException("Port Number can input only in range between [1 - 65535]", "Incorrect in -p parameter");
                 }
             }
         }
         catch (NumberFormatException ex) {
-            throw new ParameterMisMatch(ex.getMessage());
+            throw new ParameterMisMatchException(ex.getMessage() + " is not integer", "Incorrect in -x or -p parameter");
         }
 
 

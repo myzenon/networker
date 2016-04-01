@@ -1,12 +1,14 @@
+import parameter.Parameter;
+import parameter.ParameterConsoleException;
+
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class GUI {
-    private JPanel panel1;
+public class GUI implements ViewInterface {
+    private JPanel panel;
     private JTextField parameters;
     private JButton connectButton;
     private JTextField ipAddress;
@@ -16,11 +18,14 @@ public class GUI {
     private JRadioButton UDPRadioButton;
 
     private HashMap<String, String> params;
+    private GUI viewGUI;
 
     public GUI(HashMap<String, String> params) {
         this.params = params;
+        this.viewGUI = this;
         setParametersText();
         setParametersEachField();
+        parameters.setHorizontalAlignment(JTextField.CENTER);
         ipAddress.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -45,28 +50,71 @@ public class GUI {
                 super.keyReleased(e);
             }
         });
-        TCPRadioButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                params.put("t", "tcp");
-                setParametersText();
-                super.mouseClicked(e);
-            }
-        });
-        UDPRadioButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                params.put("t", "udp");
-                setParametersText();
-                super.mouseClicked(e);
-            }
-        });
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new Thread(new Client(params)).run();
+                disableField();
+                showMessage("Checking input ...", "info");
+                try {
+                    Parameter.checkNullParameter(params);
+                    Parameter.checkParameter(params);
+                    showMessage("Waiting for connection ...", "info");
+                    new Thread(new Client(params, viewGUI)).start();
+                }
+                catch (ParameterConsoleException ex) {
+                    showMessage(ex.getMessage(), "error");
+                }
             }
         });
+        TCPRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                params.put("t", "tcp");
+                setParametersText();
+            }
+        });
+        UDPRadioButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                params.put("t", "udp");
+                setParametersText();
+            }
+        });
+    }
+
+    @Override
+    public void showMessage(String message, String messageType) {
+        parameters.setBackground(Color.WHITE);
+        if(messageType.equals("info")) {
+            parameters.setForeground(Color.BLUE);
+        }
+        if(messageType.equals("error")) {
+            parameters.setForeground(Color.RED);
+            enableField();
+        }
+        if(messageType.equals("success")) {
+            parameters.setForeground(new Color(0, 150, 0));
+            enableField();
+        }
+        parameters.setText(message);
+    }
+
+    public void enableField() {
+        connectButton.setEnabled(true);
+        ipAddress.setEnabled(true);
+        port.setEnabled(true);
+        x.setEnabled(true);
+        TCPRadioButton.setEnabled(true);
+        UDPRadioButton.setEnabled(true);
+    }
+
+    public void disableField() {
+        connectButton.setEnabled(false);
+        ipAddress.setEnabled(false);
+        port.setEnabled(false);
+        x.setEnabled(false);
+        TCPRadioButton.setEnabled(false);
+        UDPRadioButton.setEnabled(false);
     }
 
     public void setParametersEachField() {
@@ -90,6 +138,8 @@ public class GUI {
     }
 
     public void setParametersText() {
+        parameters.setForeground(panel.getForeground());
+        parameters.setBackground(panel.getBackground());
         String paramsText = "";
         for(Map.Entry<String, String> param : params.entrySet()) {
             if(param.getKey().equals("gui")) {
@@ -100,9 +150,12 @@ public class GUI {
         parameters.setText(paramsText);
     }
 
-    public static void createWindow(HashMap<String, String> params) {
+
+
+    @Override
+    public void create() {
         JFrame frame = new JFrame("Client Program");
-        frame.setContentPane(new GUI(params).panel1);
+        frame.setContentPane(new GUI(params).panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);

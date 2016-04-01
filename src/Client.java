@@ -1,4 +1,4 @@
-import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -10,35 +10,48 @@ public class Client implements Runnable {
 
     private String ip, protocol, gui;
     private int port, x;
-    private JDialog dialog;
+    private ViewInterface view;
 
-    public Client(HashMap<String, String> params) {
+    public Client(HashMap<String, String> params, ViewInterface view) {
         this.ip = params.get("s");
         this.port = Integer.parseInt(params.get("p"));
         this.x = Integer.parseInt(params.get("x"));
         this.protocol = params.get("t");
         this.gui = params.get("gui");
+        this.view = view;
     }
 
-    public void connectViaTCP() throws Exception {
+    public void connectViaTCP() {
 
-        try {
-            Socket clientSocket = new Socket(this.ip, this.port);
+            try {
+                view.showMessage("Waiting for connection ...", "info");
+                Socket clientSocket = new Socket(this.ip, this.port);
+                clientSocket.setSoTimeout(3000);
 
-            DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-            outToServer.writeBytes(x + "");
+                DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+                outToServer.writeBytes(x + "\n");
+                view.showMessage("Sent number to server " + this.ip + ":" + this.port + " via TCP", "info");
+
+                BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+                try {
+                    inFromServer.readLine();
+                    view.showMessage("Sent Message Complete", "success");
+                }
+                catch (SocketTimeoutException ex) {
+                    view.showMessage("Connection Timeout. Server isn't reply in 3 seconds.", "error");
+                }
+                finally {
+                    clientSocket.close();
+                }
+
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                view.showMessage(ex.getMessage(), "error");
+            }
 
 
-            BufferedReader inFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            System.out.println("FROM SERVER: " + inFromServer.readLine());
-
-            clientSocket.close();
-
-        }
-        catch (ConnectException ex) {
-            ex.printStackTrace();
-
-        }
 
     }
 
@@ -65,19 +78,12 @@ public class Client implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("come");
-
-            if(this.gui.equals("on")) {
-                JOptionPane optionPane = new JOptionPane("Waiting For Reply ...", JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
-                dialog = optionPane.createDialog("Status");
-                dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-                dialog.setVisible(true);
+            if(protocol.equals("tcp")) {
+                connectViaTCP();
             }
-
-            connectViaTCP();
-
-
-
+            else if(protocol.equals("udp")) {
+                connectViaUDP();
+            }
         }
         catch (Exception ex) {
             System.err.println(ex.toString());
