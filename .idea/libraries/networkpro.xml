@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="networkpro">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/out/artifacts/networkpro_jar/networkpro.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

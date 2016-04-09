@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="networkpro:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/networkpro_jar</output-path>
-    <root id="archive" name="networkpro.jar">
-      <element id="module-output" name="networkpro" />
-    </root>
-  </artifact>
-</component>
