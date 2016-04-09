@@ -1,7 +1,5 @@
 import parameter.Parameter;
-import parameter.ParameterConsoleException;
-import parameter.ParameterMisMatchException;
-import parameter.ParameterNotFoundException;
+import parameter.ParameterException;
 
 import java.util.*;
 
@@ -33,7 +31,7 @@ public class Console implements ViewInterface {
             Parameter.checkParameter(this.params);
             new Thread(new Client(params, this)).start();
         }
-        catch (ParameterConsoleException ex) {
+        catch (ParameterException ex) {
             showMenuWithError(ex);
         }
     }
@@ -41,15 +39,17 @@ public class Console implements ViewInterface {
     public static void showMenu() {
         System.out.println();
         System.out.println(" [ This program require all of following argument in the same format. ]");
+        System.out.println("   By Zenon 'SI | si.zenon@gmail.com");
         System.out.println();
         System.out.println("\t-x <Number> : Number is a 32-bit unsigned integer");
         System.out.println("\t-t <UDP|TCP> : UDP and TCP are type of protocol to connect server");
         System.out.println("\t-s <IP Address> : IP Address or Host Name of the server [ex: dmx.cs.colostate.edu, 127.0.0.1]");
         System.out.println("\t-p <Port Number> : the port being used by the server [1 - 65535]");
+        System.out.println("\n\t ** -gui : To start program on graphic mode [optional]");
         System.out.println();
     }
 
-    public static void showMenuWithError(ParameterConsoleException ex) {
+    public static void showMenuWithError(ParameterException ex) {
         System.out.println();
         if(ex.getConsoleMessage() != null) {
             System.err.println(" *** " + ex.getConsoleMessage());

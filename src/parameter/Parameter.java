@@ -1,10 +1,9 @@
 package parameter;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 
-/**
- * Created by Zenon on 3/27/2016 AD.
- */
 public class Parameter {
     public static HashMap<String, String> mapParameter(String args[]) throws ParameterMisFormatException {
         HashMap<String, String> params = new HashMap<String, String>();
@@ -63,24 +62,30 @@ public class Parameter {
             if(params.get("x") != null) {
                 int x = Integer.parseInt(params.get("x"));
                 if(x < 0) {
-                    throw new ParameterMisMatchException("The number x value must in range between 0 - " + Integer.MAX_VALUE,  "Incorrect in -x parameter");
+                    throw new ParameterMisMatchException("The number x value must in range between 0 - " + Integer.MAX_VALUE + ".",  "Incorrect in -x parameter");
                 }
             }
             if(params.get("t") != null) {
                 params.put("t", params.get("t").toLowerCase());
                 if(!(params.get("t").equals("tcp") || params.get("t").equals("udp"))) {
-                    throw new ParameterMisMatchException("Protocol Type can input only 'tcp' or 'udp'", "Incorrect in -t parameter");
+                    throw new ParameterMisMatchException("Protocol Type can input only 'tcp' or 'udp'.", "Incorrect in -t parameter");
                 }
             }
             if(params.get("p") != null) {
                 int p = Integer.parseInt(params.get("p"));
                 if((p < 1) || (p > 65535)) {
-                    throw new ParameterMisMatchException("Port Number can input only in range between [1 - 65535]", "Incorrect in -p parameter");
+                    throw new ParameterMisMatchException("Port Number can input only in range between [1 - 65535].", "Incorrect in -p parameter");
                 }
             }
+            if(params.get("s") != null) {
+                InetAddress.getByName(params.get("s"));
+            }
+        }
+        catch (UnknownHostException ex) {
+            throw new ParameterMisMatchException("IP Address or Host Name is incorrect.", "Incorrect in -s parameter");
         }
         catch (NumberFormatException ex) {
-            throw new ParameterMisMatchException(ex.getMessage() + " is not integer", "Incorrect in -x or -p parameter");
+            throw new ParameterMisMatchException(ex.getMessage() + " is not integer.", "Incorrect in -x or -p parameter");
         }
 
 

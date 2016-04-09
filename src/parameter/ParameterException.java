@@ -1,13 +1,13 @@
 package parameter;
 
-public abstract class ParameterConsoleException extends Exception {
+public abstract class ParameterException extends Exception {
     private String consoleMessage;
 
     public String getConsoleMessage() {
         return consoleMessage;
     }
 
-    public ParameterConsoleException(String message, String consoleMessage) {
+    public ParameterException(String message, String consoleMessage) {
         super(message);
         this.consoleMessage = consoleMessage;
     }

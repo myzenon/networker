@@ -22,7 +22,6 @@ public class Client implements Runnable {
     }
 
     public void connectViaTCP() {
-
             try {
                 view.showMessage("Waiting for connection ...", "info");
                 Socket clientSocket = new Socket(this.ip, this.port);
@@ -42,51 +41,67 @@ public class Client implements Runnable {
                     view.showMessage("Connection Timeout. Server isn't reply in 3 seconds.", "error");
                 }
                 finally {
+                    clientSocket.shutdownOutput();
+                    clientSocket.shutdownInput();
                     clientSocket.close();
                 }
-
+            }
+            catch (SocketException ex) {
+                view.showMessage("Can't Connect to Server [" + this.ip + ":" + this.port + "]", "error");
             }
             catch (Exception ex) {
                 ex.printStackTrace();
                 view.showMessage(ex.getMessage(), "error");
             }
-
-
-
     }
 
-    public void connectViaUDP() throws Exception {
+    public void connectViaUDP() {
 
-        DatagramSocket clientSocket = new DatagramSocket();
+        try {
+            DatagramSocket clientSocket = new DatagramSocket();
+            clientSocket.setSoTimeout(3000);
 
-        String dataToSend = x + "";
-        byte[] sendData = dataToSend.getBytes();
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(this.ip), this.port);
-        clientSocket.send(sendPacket);
+            byte[] sendData = (this.x + "").getBytes();
+            DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, InetAddress.getByName(this.ip), this.port);
+            clientSocket.send(sendPacket);
 
+            view.showMessage("Sent number to server " + this.ip + ":" + this.port + " via UDP", "info");
 
-        byte[] receiveData = new byte[1024];
-        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-        clientSocket.receive(receivePacket);
+            byte[] receiveData = new byte[1024];
+            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
 
+            try {
+                clientSocket.receive(receivePacket);
+                receivePacket.getData();
+                view.showMessage("Sent Message Complete", "success");
+            }
+            catch (SocketTimeoutException ex) {
+                view.showMessage("Connection Timeout. Server isn't reply in 3 seconds.", "error");
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            finally {
+                clientSocket.close();
+            }
 
-        System.out.println("FROM SERVER:" + receivePacket.getData());
-        clientSocket.close();
+        }
+        catch (BindException ex) {
+            view.showMessage("Cannot Connect to Server", "error");
+        }
+        catch (Exception ex) {
+            ex.printStackTrace();
+        }
 
     }
 
     @Override
     public void run() {
-        try {
-            if(protocol.equals("tcp")) {
-                connectViaTCP();
-            }
-            else if(protocol.equals("udp")) {
-                connectViaUDP();
-            }
+        if(protocol.equals("tcp")) {
+            connectViaTCP();
         }
-        catch (Exception ex) {
-            System.err.println(ex.toString());
+        else if(protocol.equals("udp")) {
+            connectViaUDP();
         }
     }
 }

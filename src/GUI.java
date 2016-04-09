@@ -1,5 +1,5 @@
 import parameter.Parameter;
-import parameter.ParameterConsoleException;
+import parameter.ParameterException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -29,7 +29,12 @@ public class GUI implements ViewInterface {
         ipAddress.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                params.put("s", ipAddress.getText());
+                if(ipAddress.getText().equals("")) {
+                    params.put("s", null);
+                }
+                else {
+                    params.put("s", ipAddress.getText());
+                }
                 setParametersText();
                 super.keyReleased(e);
             }
@@ -37,7 +42,12 @@ public class GUI implements ViewInterface {
         port.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                params.put("p", port.getText());
+                if(port.getText().equals("")) {
+                    params.put("p", null);
+                }
+                else {
+                    params.put("p", port.getText());
+                }
                 setParametersText();
                 super.keyReleased(e);
             }
@@ -45,7 +55,12 @@ public class GUI implements ViewInterface {
         x.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                params.put("x", x.getText());
+                if(x.getText().equals("")) {
+                    params.put("x", null);
+                }
+                else {
+                    params.put("x", x.getText());
+                }
                 setParametersText();
                 super.keyReleased(e);
             }
@@ -61,7 +76,7 @@ public class GUI implements ViewInterface {
                     showMessage("Waiting for connection ...", "info");
                     new Thread(new Client(params, viewGUI)).start();
                 }
-                catch (ParameterConsoleException ex) {
+                catch (ParameterException ex) {
                     showMessage(ex.getMessage(), "error");
                 }
             }
@@ -145,7 +160,7 @@ public class GUI implements ViewInterface {
             if(param.getKey().equals("gui")) {
                 continue;
             }
-            paramsText += "-" + param.getKey() + " " + param.getValue() + " ";
+            paramsText += "-" + param.getKey() + " " + (param.getValue() == null ? "" : param.getValue()) + " ";
         }
         parameters.setText(paramsText);
     }
@@ -155,7 +170,7 @@ public class GUI implements ViewInterface {
     @Override
     public void create() {
         JFrame frame = new JFrame("Client Program");
-        frame.setContentPane(new GUI(params).panel);
+        frame.setContentPane(this.panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
